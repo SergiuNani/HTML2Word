@@ -1,22 +1,18 @@
+import { useState } from 'react';
 import Drunk from '/Drunk.png'
 import './App.css'
 
-function App() {
 
+function App() {
+const [color, setColor] =useState("red");
 const handleClick = async()=>{
   let [tab] =await chrome.tabs.query({currentWindow: true, active:true});
-  chrome.scripting.executeScript({
+  chrome.scripting.executeScript<string[],void>({
     target:{tabId:tab.id!},
-    func:()=>{
+    args:[color],
+    func:(color)=>{
       console.log("Daddy we here")
-      if(document.body.style.backgroundColor !="red"){
-
-        document.body.style.backgroundColor="red"
-      }
-    else{
-      document.body.style.backgroundColor="blue"
-
-    }
+      document.body.style.backgroundColor=color
     }
   })
 }
@@ -31,7 +27,11 @@ const handleClick = async()=>{
     
       </div>
       <div className="card">
-        <button onClick={handleClick}>
+        <input type="color" onChange={(e)=>{setColor(e.currentTarget.value);
+        
+        
+        }} />
+        <button onClick={()=>{handleClick()}}>
           CLICK ME
         </button>
       </div>
