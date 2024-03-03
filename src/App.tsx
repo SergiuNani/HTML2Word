@@ -5,6 +5,13 @@ import {Document, HeadingLevel, Packer, Paragraph, Table, TableCell, TableRow, V
 // import Drunk from 'Drunk.png';
 import './App.css';
 
+// import Template from "./officialClaim.docx";
+import Docxtemplater from "docxtemplater";
+import PizZip from "pizzip";
+import PizZipUtils from "pizzip/utils/index.js";
+// import OfficialClaimTemplate from 'officialClaim.docx';
+import OfficialClaimTemplate from './text.txt';
+
 function App() {
   const [htmlContent, setHtmlContent] = useState('');
 
@@ -173,6 +180,7 @@ function App() {
       <div className="card">
         <button onClick={handleClick}>CLICK ME</button>
         <button onClick={generateDoc}>To Word</button>
+        <button onClick={PrebuildGenerate}>WordPreBuild</button>
         <div>{htmlContent}</div>
       </div>
     </>
@@ -180,3 +188,52 @@ function App() {
 }
 
 export default App;
+
+const loadFile = (url: string, callback: (error: Error | null, content?: string) => void) => {
+  PizZipUtils.getBinaryContent(url, function(err: Error, data: string) {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null, data);
+    }
+  });
+};
+
+const PrebuildGenerate = () => {
+  const Template = OfficialClaimTemplate
+
+  loadFile(Template, (error, content) => {
+    if (error) {
+      throw error;
+    }
+    const zip = new PizZip(content!); // Asserting content as not undefined or null
+    const doc = new Docxtemplater(zip, {
+      paragraphLoop: true,
+      linebreaks: true
+    });
+    doc.setData({
+      signing_location: "Toulouse",
+      signing_date: `OPAOPAOPA`,
+      first_name: "Sébastien",
+      last_name: "François",
+      birth_date: "19 août 1994",
+      claim_type: "Casse",
+      incident_location: "3 rue Ella Maillart, 31300 Toulouse",
+      incident_timestamp: new Date().getFullYear(),
+      bike_name: "Vélo de champion",
+      incident_description: "Faits et actions avant, pendant, après le sinistre",
+      customer_name: "Morio"
+    });
+    try {
+      doc.render();
+    } catch (error) {
+      console.log("ERROR chief:", error);
+      throw error;
+    }
+    const out = doc.getZip().generate({
+      type: "blob",
+      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    });
+    saveAs(out, "déclaration_circonstanciée.docx");
+  });
+};
