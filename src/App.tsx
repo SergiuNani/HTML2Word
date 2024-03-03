@@ -11,8 +11,10 @@ const handleClick = async()=>{
     target:{tabId:tab.id!},
     args:[color],
     func:(color)=>{
-      console.log("Daddy we here")
+      console.log(color)
       document.body.style.backgroundColor=color
+      const html = document.querySelector("body")?.innerHTML
+      console.log(html)
     }
   })
 }
